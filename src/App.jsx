@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { db } from '../firebase';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { collection, onSnapshot, addDoc, setDoc, doc } from 'firebase/firestore';
 
 function App() {
   const [users, setUsers] = useState([]);
@@ -16,10 +16,45 @@ function App() {
     return unsub;
   }, []);
 
+  // const handleSubmit = async (event) => {
+  //   event.preventDefault();
+  //   const { name, email } = event.target.elements;
+  //   console.log(name.value, email.value);
+  // };
+
+  // // addDoc関数によるドキュメント追加
+  // const handleSubmit = async (event) => {
+  //   event.preventDefault();
+  //   const { name, email } = event.target.elements;
+  //   console.log(name.value, email.value);
+  //   const usersCollectionRef = collection(db, 'users');
+  //   const documentRef = await addDoc(usersCollectionRef, {
+  //     name: name.value,
+  //     email: email.value,
+  //   });
+  //   console.log(documentRef);
+  // };
+
+  // setDoc関数によるドキュメント追加
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    // const userDocumentRef = doc(db, 'users', 'ABCDEF');
+    // const documentRef = await setDoc(userDocumentRef, {
+    //   name: name.value,
+    //   email: email.value,
+    // });
+
     const { name, email } = event.target.elements;
-    console.log(name.value, email.value);
+
+    const userDocumentRef = doc(collection(db, 'users'));
+    await setDoc(userDocumentRef, {
+      name: name.value,
+      email: email.value,
+      // timpstamp: serverTimestamp(),
+    });
+
+    console.log(documentRef);
   };
 
   return (
