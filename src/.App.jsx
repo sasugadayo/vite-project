@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { db } from '../firebase';
-import { collection, onSnapshot, addDoc, setDoc, doc, serverTimestamp, deleteDoc } from 'firebase/firestore';
+import { collection, onSnapshot, addDoc, setDoc, doc } from 'firebase/firestore';
 
 function App() {
   const [users, setUsers] = useState([]);
@@ -38,19 +38,23 @@ function App() {
   // setDoc関数によるドキュメント追加
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    // const userDocumentRef = doc(db, 'users', 'ABCDEF');
+    // const documentRef = await setDoc(userDocumentRef, {
+    //   name: name.value,
+    //   email: email.value,
+    // });
+
     const { name, email } = event.target.elements;
 
     const userDocumentRef = doc(collection(db, 'users'));
     await setDoc(userDocumentRef, {
       name: name.value,
       email: email.value,
-      timpstamp: serverTimestamp(),
+      // timpstamp: serverTimestamp(),
     });
-  };
 
-  const deleteUser = async (id) => {
-    const userDocumentRef = doc(db, 'users', id);
-    await deleteDoc(userDocumentRef);
+    console.log(documentRef);
   };
 
   return (
@@ -71,10 +75,7 @@ function App() {
       <h1>ユーザ一覧</h1>
       <div>
         {users.map((user) => (
-          <div key={user.id}>
-            <span>{user.name}</span>
-            <button onClick={() => deleteUser(user.id)}>削除</button>
-          </div>
+          <div key={user.id}>{user.name}</div>
         ))}
       </div>
     </div>
