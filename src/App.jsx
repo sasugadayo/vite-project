@@ -1,18 +1,32 @@
 
 import { useState, useEffect } from 'react';
 import { db } from '../firebase';
-import { collection, onSnapshot, addDoc, setDoc, doc, serverTimestamp, deleteDoc } from 'firebase/firestore';
+import { collection, onSnapshot, addDoc, setDoc, doc, serverTimestamp, deleteDoc, query, where, getDocs, updateDoc, orderBy, limit } from 'firebase/firestore';
 
 function App() {
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
+    // 通常取得
+    // const usersCollectionRef = collection(db, 'users');
+    // const unsub = onSnapshot(usersCollectionRef, (querySnapshot) => {
+    //   setUsers(
+    //     querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
+    //   );
+    // });
+
+    // ソート
     const usersCollectionRef = collection(db, 'users');
-    const unsub = onSnapshot(usersCollectionRef, (querySnapshot) => {
+    // 降順
+    // const q = query(usersCollectionRef, orderBy('name', 'desc'));
+    const q = query(usersCollectionRef, orderBy('name'), limit(2));
+    // 取得件数制限
+    const unsub = onSnapshot(q, (querySnapshot) => {
       setUsers(
         querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
       );
     });
+
     return unsub;
   }, []);
 
@@ -48,9 +62,28 @@ function App() {
     });
   };
 
-  const deleteUser = async (id) => {
+  // const deleteUser = async (id) => {
+  //   const userDocumentRef = doc(db, 'users', id);
+  //   await deleteDoc(userDocumentRef);
+  // };
+
+  // ユーザー削除
+  const deleteUser = async (name) => {
+    const userCollectionRef = collection(db, 'users');
+    const q = query(userCollectionRef, where('name', '==', name));
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach(async (document) => {
+      const userDocumentRef = doc(db, 'users', document.id);
+      await deleteDoc(userDocumentRef);
+    });
+  };
+
+  // admin
+  const changeAdmin = async (id) => {
     const userDocumentRef = doc(db, 'users', id);
-    await deleteDoc(userDocumentRef);
+    await updateDoc(userDocumentRef, {
+      admin: true,
+    });
   };
 
   return (
@@ -73,7 +106,11 @@ function App() {
         {users.map((user) => (
           <div key={user.id}>
             <span>{user.name}</span>
+            {/* <button onClick={() => deleteUser(user.id)}>削除</button> */}
             <button onClick={() => deleteUser(user.id)}>削除</button>
+            {!user.admin && (
+              <button onClick={() => changeAdmin(user.id)}>admin</button>
+            )}
           </div>
         ))}
       </div>
